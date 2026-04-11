@@ -13,8 +13,12 @@
     disableMaxIter = false,
     disablePower = false,
     ctrlState = viewerState,
-    onIterChange = (v) => { viewerState.maxIter = v; },
-    onPowerChange = (v) => { viewerState.power = v; },
+    onIterChange = (v) => {
+      viewerState.maxIter = v;
+    },
+    onPowerChange = (v) => {
+      viewerState.power = v;
+    },
     open = $bindable(true)
   }: {
     onNavigate: (re: number, im: number, zoom?: number) => void;
@@ -69,7 +73,7 @@
   }
 
   function commitZoom() {
-    const z = parseInt(zoomInput);
+    const z = parseFloat(zoomInput);
     if (!isNaN(z) && z >= 0) onNavigate(parseFloat(reInput), parseFloat(imInput), z);
   }
 
@@ -83,123 +87,155 @@
     if (!isNaN(v) && v >= 2 && v <= 10) onPowerChange?.(v);
   }
 
-  function onKeydown(e: KeyboardEvent, commit: () => void) {
-    if (e.key === 'Enter') { commit(); (e.target as HTMLElement).blur(); }
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const target = e.target as HTMLElement;
+      setTimeout(() => target.blur());
+    }
   }
 </script>
 
 <div class="flex flex-row items-start gap-2">
-  <CollapsiblePanel title="Position" position="top-left" bind:open focusRef={zoomInputRef} oncollapse={() => (showLocations = false)}>
-  <div class="flex flex-col gap-3 p-3">
-    <ToggleButton active={showLocations} onclick={() => (showLocations = !showLocations)} class="w-full" chevron="right">
-      Locations
-    </ToggleButton>
-    <div>
-      <div class="text-neutral-400 text-xs mb-1">Zoom level</div>
-      <input
-        bind:this={zoomInputRef}
-        class="w-full bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none"
-        type="text"
-        value={zoomInput}
-        onfocus={() => (zoomFocused = true)}
-        onblur={() => { zoomFocused = false; commitZoom(); zoomInput = ctrlState.zoom.toString(); }}
-        oninput={(e) => (zoomInput = (e.target as HTMLInputElement).value)}
-        onkeydown={(e) => onKeydown(e, commitZoom)}
-      />
-    </div>
-
-    <div>
-      <div class="text-neutral-400 text-xs mb-1">Center (Re)</div>
-      <input
-        class="w-full bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none"
-        type="text"
-        value={reInput}
-        onfocus={() => (reFocused = true)}
-        onblur={() => { reFocused = false; commitCoords(); reInput = (+ctrlState.cx).toPrecision(8).replace(/\.?0+$/, ''); }}
-        oninput={(e) => (reInput = (e.target as HTMLInputElement).value)}
-        onkeydown={(e) => onKeydown(e, commitCoords)}
-      />
-    </div>
-
-    <div>
-      <div class="text-neutral-400 text-xs mb-1">Center (Im)</div>
-      <input
-        class="w-full bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none"
-        type="text"
-        value={imInput}
-        onfocus={() => (imFocused = true)}
-        onblur={() => { imFocused = false; commitCoords(); imInput = (+ctrlState.cy).toPrecision(8).replace(/\.?0+$/, ''); }}
-        oninput={(e) => (imInput = (e.target as HTMLInputElement).value)}
-        onkeydown={(e) => onKeydown(e, commitCoords)}
-      />
-    </div>
-
-    <div>
-      <div class="text-neutral-400 text-xs mb-1">Max Iterations</div>
-      <div class="flex items-center gap-2">
+  <CollapsiblePanel
+    title="Position"
+    position="top-left"
+    bind:open
+    focusRef={zoomInputRef}
+    oncollapse={() => (showLocations = false)}
+  >
+    <div class="flex flex-col gap-3 p-3">
+      <ToggleButton
+        active={showLocations}
+        onclick={() => (showLocations = !showLocations)}
+        class="w-full"
+        chevron="right"
+      >
+        Locations
+      </ToggleButton>
+      <div>
+        <div class="text-neutral-400 text-xs mb-1">Zoom level</div>
         <input
-          type="range"
-          min="64"
-          max="4096"
-          step="4"
-          value={ctrlState.maxIter}
-          oninput={(e) => {
-            if (!disableMaxIter) onIterChange?.(parseInt((e.target as HTMLInputElement).value));
-          }}
-          use:wheelSlider
-          disabled={disableMaxIter}
-          class="flex-1 min-w-0 accent-blue-500 disabled:opacity-30"
-        />
-        <input
-          class="w-16 bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right disabled:opacity-30"
+          bind:this={zoomInputRef}
+          class="w-full bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none"
           type="text"
-          value={iterInput}
-          onfocus={() => (iterFocused = true)}
-          onblur={() => { iterFocused = false; commitIter(); iterInput = ctrlState.maxIter.toString(); }}
-          oninput={(e) => (iterInput = (e.target as HTMLInputElement).value)}
-          onkeydown={(e) => onKeydown(e, commitIter)}
-          disabled={disableMaxIter}
+          value={zoomInput}
+          onfocus={() => (zoomFocused = true)}
+          onblur={() => {
+            zoomFocused = false;
+            commitZoom();
+            zoomInput = ctrlState.zoom.toString();
+          }}
+          oninput={(e) => (zoomInput = (e.target as HTMLInputElement).value)}
+          onkeydown={(e) => onKeydown(e)}
         />
       </div>
-    </div>
 
-    <div>
-      <div class="text-neutral-400 text-xs mb-1">Exponent</div>
-      <div class="flex items-center gap-2">
+      <div>
+        <div class="text-neutral-400 text-xs mb-1">Center (Re)</div>
         <input
-          type="range"
-          min="2"
-          max="10"
-          step="1"
-          value={ctrlState.power}
-          oninput={(e) => {
-            if (!disablePower) onPowerChange?.(parseInt((e.target as HTMLInputElement).value));
-          }}
-          use:wheelSlider
-          disabled={disablePower}
-          class="flex-1 min-w-0 accent-blue-500 disabled:opacity-30"
-        />
-        <input
-          class="w-16 bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right disabled:opacity-30"
+          class="w-full bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none"
           type="text"
-          value={powerInput}
-          onfocus={() => (powerFocused = true)}
-          onblur={() => { powerFocused = false; commitPower(); powerInput = ctrlState.power.toString(); }}
-          oninput={(e) => (powerInput = (e.target as HTMLInputElement).value)}
-          onkeydown={(e) => onKeydown(e, commitPower)}
-          disabled={disablePower}
+          value={reInput}
+          onfocus={() => (reFocused = true)}
+          onblur={() => {
+            reFocused = false;
+            commitCoords();
+            reInput = (+ctrlState.cx).toPrecision(8).replace(/\.?0+$/, '');
+          }}
+          oninput={(e) => (reInput = (e.target as HTMLInputElement).value)}
+          onkeydown={(e) => onKeydown(e)}
         />
       </div>
+
+      <div>
+        <div class="text-neutral-400 text-xs mb-1">Center (Im)</div>
+        <input
+          class="w-full bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none"
+          type="text"
+          value={imInput}
+          onfocus={() => (imFocused = true)}
+          onblur={() => {
+            imFocused = false;
+            commitCoords();
+            imInput = (+ctrlState.cy).toPrecision(8).replace(/\.?0+$/, '');
+          }}
+          oninput={(e) => (imInput = (e.target as HTMLInputElement).value)}
+          onkeydown={(e) => onKeydown(e)}
+        />
+      </div>
+
+      <div>
+        <div class="text-neutral-400 text-xs mb-1">Max Iterations</div>
+        <div class="flex items-center gap-2">
+          <input
+            type="range"
+            min="64"
+            max="4096"
+            step="4"
+            value={ctrlState.maxIter}
+            oninput={(e) => {
+              if (!disableMaxIter) onIterChange?.(parseInt((e.target as HTMLInputElement).value));
+            }}
+            use:wheelSlider
+            disabled={disableMaxIter}
+            class="flex-1 min-w-0 accent-blue-500 disabled:opacity-30"
+          />
+          <input
+            class="w-16 bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right disabled:opacity-30"
+            type="text"
+            value={iterInput}
+            onfocus={() => (iterFocused = true)}
+            onblur={() => {
+              iterFocused = false;
+              commitIter();
+              iterInput = ctrlState.maxIter.toString();
+            }}
+            oninput={(e) => (iterInput = (e.target as HTMLInputElement).value)}
+            onkeydown={(e) => onKeydown(e)}
+            disabled={disableMaxIter}
+          />
+        </div>
+      </div>
+
+      <div>
+        <div class="text-neutral-400 text-xs mb-1">Exponent</div>
+        <div class="flex items-center gap-2">
+          <input
+            type="range"
+            min="2"
+            max="10"
+            step="1"
+            value={ctrlState.power}
+            oninput={(e) => {
+              if (!disablePower) onPowerChange?.(parseInt((e.target as HTMLInputElement).value));
+            }}
+            use:wheelSlider
+            disabled={disablePower}
+            class="flex-1 min-w-0 accent-blue-500 disabled:opacity-30"
+          />
+          <input
+            class="w-16 bg-neutral-800 text-white font-mono rounded px-2 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right disabled:opacity-30"
+            type="text"
+            value={powerInput}
+            onfocus={() => (powerFocused = true)}
+            onblur={() => {
+              powerFocused = false;
+              commitPower();
+              powerInput = ctrlState.power.toString();
+            }}
+            oninput={(e) => (powerInput = (e.target as HTMLInputElement).value)}
+            onkeydown={(e) => onKeydown(e)}
+            disabled={disablePower}
+          />
+        </div>
+      </div>
     </div>
-  </div>
-</CollapsiblePanel>
+  </CollapsiblePanel>
 
   {#if showLocations}
     <div transition:fly={{ x: -16, duration: 150, opacity: 0 }}>
-      <LocationsPanel
-        {onNavigate}
-        onClose={() => (showLocations = false)}
-      />
+      <LocationsPanel {onNavigate} onClose={() => (showLocations = false)} />
     </div>
   {/if}
 </div>

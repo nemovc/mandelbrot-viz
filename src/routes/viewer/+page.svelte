@@ -217,6 +217,7 @@
 <div use:keyboardLayer={handleKeydown} class="relative w-full h-full">
   <MandelbrotMap
     bind:this={mapComponent}
+    zoomSnap={0}
     {inspectorActive}
     {onInspectorMove}
     {onInspectorClick}

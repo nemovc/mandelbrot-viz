@@ -79,9 +79,9 @@
     }
   }
 
-  function cancel() {
+  function revert() {
     setColors(JSON.parse(JSON.stringify(cancelSnapshot)));
-    onClose();
+    selectedStopIdx = null;
   }
 
   function tFromBarEvent(e: PointerEvent): number {
@@ -133,30 +133,11 @@
     <span class="text-xs font-medium uppercase tracking-wider text-neutral-400 truncate flex-1">
       Editing {displayName} palette
     </span>
-    <div class="flex items-center gap-1">
-      <button
-        class="px-2 py-1 rounded text-xs border border-neutral-700 text-neutral-400 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        onclick={() => {
-          setColors(JSON.parse(JSON.stringify(cancelSnapshot)));
-          selectedStopIdx = null;
-        }}
-        disabled={!dirty}
-        title="Reset to pre-edit state">Reset</button
-      >
-      <button
-        class="px-2 py-1 rounded text-xs border border-neutral-700 text-neutral-400 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        onclick={() => (showSaveModal = true)}
-        disabled={!dirty}>Save…</button
-      >
-      <button
-        class="px-2 py-1 rounded text-xs border border-neutral-700 text-neutral-400 hover:text-white transition-colors"
-        onclick={cancel}>Cancel</button
-      >
-      <button
-        class="px-2 py-1 rounded text-xs bg-blue-700 border border-blue-600 text-white hover:bg-blue-600 transition-colors"
-        onclick={onClose}>Done</button
-      >
-    </div>
+    <button
+      class="text-neutral-500 hover:text-white transition-colors text-sm leading-none"
+      onclick={onClose}
+      title="Close">✕</button
+    >
   </div>
 
   <!-- Editor body -->
@@ -164,7 +145,9 @@
     <!-- Gradient bar -->
     <div
       bind:this={barEl}
-      class="h-10 rounded relative overflow-visible select-none {colors.palette.length >= MAX_STOPS ? 'cursor-not-allowed' : 'cursor-crosshair'}"
+      class="h-10 rounded relative overflow-visible select-none {colors.palette.length >= MAX_STOPS
+        ? 'cursor-not-allowed'
+        : 'cursor-crosshair'}"
       style="background: {gradient}"
       ondblclick={onBarDblClick}
       role="img"
@@ -256,7 +239,9 @@
       </div>
     {:else}
       <p class="text-xs text-neutral-600 pt-1">
-        Click a handle to edit. Double-click bar to add{colors.palette.length >= MAX_STOPS ? ' (max reached)' : ''}. Double-click handle to delete.
+        Click a handle to edit. Double-click bar to add{colors.palette.length >= MAX_STOPS
+          ? ' (max reached)'
+          : ''}. Double-click handle to delete.
       </p>
     {/if}
 
@@ -338,7 +323,7 @@
     {/if}
 
     <!-- In-set color + Reverse -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 pb-1">
       <label class="text-neutral-400 text-xs shrink-0" for="pe-inSetColor">In-set color</label>
       <input
         id="pe-inSetColor"
@@ -367,6 +352,21 @@
         title="Reverse palette">⇄ Reverse</button
       >
     </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="flex items-center justify-end gap-2 px-3 py-2 border-t border-neutral-800">
+    <button
+      class="px-2 py-1 rounded text-xs border border-neutral-700 text-neutral-400 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      onclick={revert}
+      disabled={!dirty}
+      title="Undo all edits since the editor was opened">Revert</button
+    >
+    <button
+      class="px-2 py-1 rounded text-xs border border-neutral-700 text-neutral-400 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      onclick={() => (showSaveModal = true)}
+      disabled={!dirty}>Save…</button
+    >
   </div>
 </div>
 

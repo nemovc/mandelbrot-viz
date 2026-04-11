@@ -13,6 +13,7 @@
     setColors,
     layout = 'vertical',
     hideOffsetToggle = false,
+    dirty = false,
     onClose,
     onApply
   }: {
@@ -22,6 +23,7 @@
     setColors: (c: ColorConfig) => void;
     layout?: 'vertical' | 'horizontal';
     hideOffsetToggle?: boolean;
+    dirty?: boolean;
     onClose: () => void;
     onApply: (name: string) => void;
   } = $props();
@@ -29,6 +31,7 @@
   let includeOffsets = $state(false);
   let pendingDelete = $state<string | null>(null);
   let showDeleteModal = $state(false);
+  let pendingApply = $state<string | null>(null);
 
   const presets = $derived(presetsFor(algorithm));
 
@@ -40,7 +43,16 @@
     } else {
       setColors({ ...colors, palette: JSON.parse(JSON.stringify(config.palette)) });
     }
+    pendingApply = null;
     onApply(name);
+  }
+
+  function requestApply(name: string) {
+    if (dirty && name !== activePaletteName) {
+      pendingApply = name;
+    } else {
+      applyPalette(name);
+    }
   }
 
   function confirmDelete(name: string) {
@@ -74,6 +86,21 @@
     >
   </div>
 
+  <!-- Unsaved-edits confirmation strip -->
+  {#if pendingApply !== null}
+    <div class="px-3 py-2 border-b border-neutral-800 bg-neutral-800/60 flex items-center gap-2">
+      <span class="text-xs text-neutral-300 flex-1">Discard unsaved edits?</span>
+      <button
+        class="px-2 py-1 rounded text-xs border border-neutral-700 text-neutral-400 hover:text-white transition-colors"
+        onclick={() => (pendingApply = null)}>Keep editing</button
+      >
+      <button
+        class="px-2 py-1 rounded text-xs bg-red-900/60 border border-red-700 text-red-300 hover:bg-red-800/60 transition-colors"
+        onclick={() => applyPalette(pendingApply!)}>Discard</button
+      >
+    </div>
+  {/if}
+
   <!-- Include cycle/offset toggle -->
   {#if !hideOffsetToggle}
     <div class="px-2 py-1.5 border-b border-neutral-800">
@@ -99,7 +126,7 @@
           name
             ? 'border-blue-500'
             : 'border-neutral-700 hover:border-neutral-500'}"
-          onclick={() => applyPalette(name)}
+          onclick={() => requestApply(name)}
         >
           <span class="px-2 py-1 text-xs text-neutral-300 truncate">{name}</span>
           <PalettePreview colors={config} class="h-6 rounded-none" />
@@ -122,7 +149,7 @@
               saved.name
                 ? 'border-blue-500'
                 : 'border-neutral-700 hover:border-neutral-500'}"
-              onclick={() => applyPalette(saved.name)}
+              onclick={() => requestApply(saved.name)}
             >
               <span class="px-2 py-1 text-xs text-neutral-300 truncate">{saved.name}</span>
               <PalettePreview colors={saved.config} class="h-6 rounded-none" />

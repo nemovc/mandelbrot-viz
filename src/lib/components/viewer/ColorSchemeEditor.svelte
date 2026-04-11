@@ -20,7 +20,9 @@
 
   let {
     colors = viewerState.colors,
-    setColors = (c) => { viewerState.colors = c; },
+    setColors = (c) => {
+      viewerState.colors = c;
+    },
     onCyclePeriodChange,
     onOffsetChange,
     cyclePeriodValue,
@@ -58,8 +60,7 @@
   let baseline = $state<ColorStop[]>(
     JSON.parse(
       JSON.stringify(
-        (initialPreset ? initialPreset[1].palette : initialSaved?.config.palette) ??
-          colors.palette
+        (initialPreset ? initialPreset[1].palette : initialSaved?.config.palette) ?? colors.palette
       )
     )
   );
@@ -130,8 +131,8 @@
       <PaletteEditor
         {activePaletteName}
         {baseline}
-        colors={colors}
-        setColors={setColors}
+        {colors}
+        {setColors}
         onClose={() => (showEditor = false)}
         onSave={onEditorSave}
       />
@@ -143,8 +144,9 @@
       <PalettePanel
         {activePaletteName}
         algorithm={colors.algorithm}
-        colors={colors}
-        setColors={setColors}
+        {colors}
+        {setColors}
+        {dirty}
         onClose={() => (showPalettePanel = false)}
         onApply={onPaletteApplied}
       />
@@ -208,8 +210,7 @@
       <!-- Row 3: Cycle Period -->
       <div>
         <label
-          class="text-neutral-400 text-xs {baseAlgorithm(colors.algorithm) ===
-          'histogram'
+          class="text-neutral-400 text-xs {baseAlgorithm(colors.algorithm) === 'histogram'
             ? 'opacity-30'
             : ''}"
           for="cyclePeriod">Cycle Period</label
@@ -225,12 +226,18 @@
             oninput={handleCyclePeriodChange}
             use:wheelSlider
             disabled={baseAlgorithm(colors.algorithm) === 'histogram'}
-            class="flex-1 min-w-0 accent-blue-500 disabled:opacity-30 {!hasCyclePeriodKeyframe && baseAlgorithm(colors.algorithm) !== 'histogram' ? 'opacity-30' : ''}"
+            class="flex-1 min-w-0 accent-blue-500 disabled:opacity-30 {!hasCyclePeriodKeyframe &&
+            baseAlgorithm(colors.algorithm) !== 'histogram'
+              ? 'opacity-30'
+              : ''}"
           />
           <input
             type="text"
             disabled={baseAlgorithm(colors.algorithm) === 'histogram'}
-            class="w-12 bg-neutral-800 text-white font-mono rounded px-1 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right disabled:opacity-30 {!hasCyclePeriodKeyframe && baseAlgorithm(colors.algorithm) !== 'histogram' ? 'opacity-30' : ''}"
+            class="w-12 bg-neutral-800 text-white font-mono rounded px-1 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right disabled:opacity-30 {!hasCyclePeriodKeyframe &&
+            baseAlgorithm(colors.algorithm) !== 'histogram'
+              ? 'opacity-30'
+              : ''}"
             value={displayCyclePeriod}
             onblur={(e) => {
               const v = parseInt((e.target as HTMLInputElement).value);
@@ -270,12 +277,16 @@
           />
           <input
             type="text"
-            class="w-12 bg-neutral-800 text-white font-mono rounded px-1 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right {!hasOffsetKeyframe ? 'opacity-30' : ''}"
+            class="w-12 bg-neutral-800 text-white font-mono rounded px-1 py-1 text-xs border border-neutral-700 focus:border-blue-500 outline-none text-right {!hasOffsetKeyframe
+              ? 'opacity-30'
+              : ''}"
             value={displayOffset.toFixed(2)}
             onblur={(e) => {
               const v = parseFloat((e.target as HTMLInputElement).value);
               if (!isNaN(v))
-                handleOffsetChange({ target: { value: Math.max(0, Math.min(1, v)).toString() } } as unknown as Event);
+                handleOffsetChange({
+                  target: { value: Math.max(0, Math.min(1, v)).toString() }
+                } as unknown as Event);
             }}
             onkeydown={(e) => {
               if (e.key === 'Enter') (e.target as HTMLElement).blur();
@@ -310,7 +321,7 @@
 
       <!-- Row 6: Preview bar + Reverse -->
       <div class="flex items-center gap-2">
-        <PalettePreview colors={colors} />
+        <PalettePreview {colors} />
         <ToggleButton
           active={colors.reverse ?? false}
           onclick={() =>

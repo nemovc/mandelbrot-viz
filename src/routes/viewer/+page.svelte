@@ -247,7 +247,11 @@
   </div>
 
   <div class="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
-    <ColorSchemeEditor bind:open={colorOpen} />
+    <ColorSchemeEditor
+      bind:open={colorOpen}
+      colors={viewerState.colors}
+      setColors={(c) => { viewerState.colors = c; }}
+    />
   </div>
 
   <!-- Zoom controls -->

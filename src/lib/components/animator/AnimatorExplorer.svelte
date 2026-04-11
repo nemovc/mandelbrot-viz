@@ -47,7 +47,9 @@
         mapRef.panTo(parseFloat(s.cx), parseFloat(s.cy), s.zoom);
       }
       // Reset flag after a microtask to allow map to update
-      setTimeout(() => { isSyncingFromParent = false; }, 0);
+      setTimeout(() => {
+        isSyncingFromParent = false;
+      }, 0);
     });
   });
 
@@ -81,5 +83,11 @@
 </script>
 
 <div class="w-full h-full">
-  <MandelbrotMap bind:this={mapRef} bind:state={localState} {zoomOffset} zoomSnap={0} />
+  <MandelbrotMap
+    bind:this={mapRef}
+    bind:state={localState}
+    {zoomOffset}
+    zoomSnap={0}
+    unbounded={true}
+  />
 </div>

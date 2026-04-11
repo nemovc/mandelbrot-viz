@@ -14,6 +14,7 @@
     state = $bindable(viewerState),
     zoomOffset = 0,
     zoomSnap = 1,
+    unbounded = false,
     inspectorActive = false,
     onInspectorMove,
     onInspectorClick,
@@ -22,6 +23,7 @@
     state?: ViewerState;
     zoomOffset?: number;
     zoomSnap?: number;
+    unbounded?: boolean;
     inspectorActive?: boolean;
     onInspectorMove?: (re: number, im: number, sx: number, sy: number) => void;
     onInspectorClick?: () => void;
@@ -66,8 +68,8 @@
       attributionControl: false,
       zoomControl: false,
       scrollWheelZoom: false,
-      maxBounds: worldBounds,
-      maxBoundsViscosity: 1.0,
+      maxBounds: unbounded ? undefined : worldBounds,
+      maxBoundsViscosity: unbounded ? 0 : 1.0,
       fadeAnimation: false
     });
 
@@ -110,15 +112,19 @@
     // and reimplement it here: zoom by exactly 1 step per scroll event, towards the
     // mouse position (matching Leaflet's built-in behaviour via setZoomAround).
     // Math.round ensures we always land on an integer even if the current zoom is fractional.
-    mapContainer.addEventListener('wheel', (e) => {
-      if (!leafletMap) return;
-      e.preventDefault();
-      const delta = e.deltaY < 0 ? 1 : -1;
-      const currentZoom = leafletMap.getZoom();
-      const rect = mapContainer.getBoundingClientRect();
-      const mousePoint = L.point(e.clientX - rect.left, e.clientY - rect.top);
-      leafletMap.setZoomAround(mousePoint, Math.round(currentZoom) + delta, { animate: true });
-    }, { passive: false });
+    mapContainer.addEventListener(
+      'wheel',
+      (e) => {
+        if (!leafletMap) return;
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 1 : -1;
+        const currentZoom = leafletMap.getZoom();
+        const rect = mapContainer.getBoundingClientRect();
+        const mousePoint = L.point(e.clientX - rect.left, e.clientY - rect.top);
+        leafletMap.setZoomAround(mousePoint, Math.round(currentZoom) + delta, { animate: true });
+      },
+      { passive: false }
+    );
   });
 
   onDestroy(() => {

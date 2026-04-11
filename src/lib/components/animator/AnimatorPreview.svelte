@@ -169,6 +169,10 @@
     }
     const frame = animationState.currentFrame;
     hasKeyframes;
+    // revision is incremented by every commit() — including updateProject (palette, algorithm,
+    // etc.). Deep property mutations via Object.assign don't reliably trigger re-renders from
+    // inside renderFrame, so we track revision explicitly to cover those cases.
+    animationState.revision;
     renderFrame(frame);
   });
 

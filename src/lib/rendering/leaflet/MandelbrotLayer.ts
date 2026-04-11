@@ -273,7 +273,6 @@ export function createMandelbrotLayer(L: typeof import('leaflet')) {
 
     /** Recompute all visible tiles via workers (used when maxIter or power changes). */
     recompute() {
-      this._lastCdf = null;
       const s3Pool = ViewerS3Pool.instance;
       const rcPool = ViewerRecolorPool.instance;
       const colorConfig = JSON.parse(JSON.stringify(this.colorConfig!));
@@ -297,6 +296,7 @@ export function createMandelbrotLayer(L: typeof import('leaflet')) {
         const precisionMode = getPrecisionMode(z);
 
         const { s3id } = tileIds(x, y, z);
+        const lastCdf = this._lastCdf;
         s3Pool.submit(
           {
             id: s3id,
@@ -309,6 +309,7 @@ export function createMandelbrotLayer(L: typeof import('leaflet')) {
             power,
             precisionMode,
             colorConfig,
+            cdf: lastCdf ? new Float32Array(lastCdf) : undefined,
             priority: 0,
             debug: debugState.debugLogging,
             slow: debugState.slowMode

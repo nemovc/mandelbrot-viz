@@ -162,7 +162,11 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    const inInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+    const inInput =
+      e.target instanceof HTMLInputElement ||
+      e.target instanceof HTMLButtonElement ||
+      e.target instanceof HTMLTextAreaElement ||
+      e.target instanceof HTMLSelectElement;
 
     // Escape blurs focused inputs
     if (e.key === 'Escape' && inInput) {
@@ -244,14 +248,19 @@
 
   <!-- HUD overlays -->
   <div class="absolute top-3 left-3 z-[1000] flex flex-col gap-2">
-    <ControlPanel onNavigate={(re, im, zoom) => mapComponent?.panTo(re, im, zoom)} bind:open={positionOpen} />
+    <ControlPanel
+      onNavigate={(re, im, zoom) => mapComponent?.panTo(re, im, zoom)}
+      bind:open={positionOpen}
+    />
   </div>
 
   <div class="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
     <ColorSchemeEditor
       bind:open={colorOpen}
       colors={viewerState.colors}
-      setColors={(c) => { viewerState.colors = c; }}
+      setColors={(c) => {
+        viewerState.colors = c;
+      }}
     />
   </div>
 
@@ -284,10 +293,30 @@
   <div class="absolute bottom-3 left-3 z-[1000]">
     <DebugPanel
       pools={[
-        { name: 'S2', pool: ViewerS2Pool.instance, textColor: 'text-blue-400', barColor: 'bg-blue-400' },
-        { name: 'S3', pool: ViewerS3Pool.instance, textColor: 'text-green-500', barColor: 'bg-green-500' },
-        { name: 'RC', pool: ViewerRecolorPool.instance, textColor: 'text-purple-400', barColor: 'bg-purple-400' },
-        { name: 'EX', pool: ViewerExportPool.instance, textColor: 'text-yellow-400', barColor: 'bg-yellow-400' }
+        {
+          name: 'S2',
+          pool: ViewerS2Pool.instance,
+          textColor: 'text-blue-400',
+          barColor: 'bg-blue-400'
+        },
+        {
+          name: 'S3',
+          pool: ViewerS3Pool.instance,
+          textColor: 'text-green-500',
+          barColor: 'bg-green-500'
+        },
+        {
+          name: 'RC',
+          pool: ViewerRecolorPool.instance,
+          textColor: 'text-purple-400',
+          barColor: 'bg-purple-400'
+        },
+        {
+          name: 'EX',
+          pool: ViewerExportPool.instance,
+          textColor: 'text-yellow-400',
+          barColor: 'bg-yellow-400'
+        }
       ]}
       bind:open={debugOpen}
     />

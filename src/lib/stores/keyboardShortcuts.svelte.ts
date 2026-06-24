@@ -22,6 +22,31 @@ class KeyboardManager {
   }
 }
 
+const escapableInputs = [
+  HTMLInputElement,
+  HTMLButtonElement,
+  HTMLTextAreaElement,
+  HTMLSelectElement
+];
+
+// If the user has an element selected it, check if it's an input type
+export function isInInput(event: KeyboardEvent) {
+  return escapableInputs.some((t) => event.target instanceof t);
+}
+
+// Returns true if the focus is currently in an input
+// If it is, escape will blur that input, otherwise handle normally
+export function handleInInput(event: KeyboardEvent) {
+  if (isInInput(event)) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      (event.target as HTMLElement).blur();
+    }
+    return true;
+  }
+  return false;
+}
+
 export const keyboard = new KeyboardManager();
 
 /**

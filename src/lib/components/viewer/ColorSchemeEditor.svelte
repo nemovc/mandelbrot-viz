@@ -43,6 +43,10 @@
   } = $props();
 
   let algorithmRef = $state<HTMLSelectElement | null>(null);
+  function focus() {
+    algorithmRef?.focus();
+  }
+  export { focus };
 
   let showPalettePanel = $state(false);
   let showEditor = $state(false);
@@ -157,7 +161,6 @@
     title="Color Scheme"
     position="top-right"
     bind:open
-    focusRef={algorithmRef}
     oncollapse={() => {
       showPalettePanel = false;
       showEditor = false;

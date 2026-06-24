@@ -21,13 +21,17 @@
 
   let resetRef = $state<HTMLButtonElement | null>(null);
 
+  function focus() {
+    resetRef?.focus();
+  }
+  export { focus };
   function getShareLink() {
     const encoded = encodeState(viewerState.toJSON(), debugState.toJSON());
     return `${location.origin}${location.pathname}#${encoded}`;
   }
 </script>
 
-<CollapsiblePanel title="Actions" position="bottom-right" bind:open focusRef={resetRef}>
+<CollapsiblePanel title="Actions" position="bottom-right" bind:open>
   <div class="flex flex-col gap-1.5 p-3">
     <button
       bind:this={resetRef}
@@ -49,7 +53,7 @@
       class:bg-neutral-800={!inspectorActive}
       class:hover:bg-neutral-700={!inspectorActive}
       class:border-neutral-700={!inspectorActive}
-      onclick={onToggleInspector}>Inspector {inspectorActive ? "On" : "Off"}</button
+      onclick={onToggleInspector}>Inspector {inspectorActive ? 'On' : 'Off'}</button
     >
     <button
       class="w-full px-2 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white rounded transition-colors"

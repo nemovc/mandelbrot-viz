@@ -11,7 +11,7 @@
   import ImportProjectModal from './ImportProjectModal.svelte';
   import ExportVideoModal from './ExportVideoModal.svelte';
   import { ChevronLeft } from 'lucide-svelte';
-import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
+  import { handleInInput, keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
   import { animationState, TRACK_LABELS, type EasingType } from '$lib/stores/animationState.svelte';
   import { exportWebM, type ExportProgress } from '$lib/utils/animator/videoExporter';
   import { interpolateTrack, interpolateAll } from '$lib/utils/animator/interpolation';
@@ -180,14 +180,10 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
 
   // ---- Keyboard shortcuts ----
   function handleKey(e: KeyboardEvent) {
-    const inInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement;
-
-    if (e.key === 'Escape' && inInput) {
-      (e.target as HTMLElement).blur();
+    // Escape blurs focused inputs
+    if (handleInInput(e)) {
       return;
     }
-
-    if (inInput) return;
 
     if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
       e.preventDefault();
@@ -373,22 +369,14 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
   function handleCyclePeriodChange(v: number) {
     const track = project.tracks.find((t) => t.parameter === 'cyclePeriod');
     if (track) {
-      animationState.addKeyframe(
-        project.tracks.indexOf(track),
-        animationState.currentFrame,
-        v
-      );
+      animationState.addKeyframe(project.tracks.indexOf(track), animationState.currentFrame, v);
     }
   }
 
   function handleOffsetChange(v: number) {
     const track = project.tracks.find((t) => t.parameter === 'offset');
     if (track) {
-      animationState.addKeyframe(
-        project.tracks.indexOf(track),
-        animationState.currentFrame,
-        v
-      );
+      animationState.addKeyframe(project.tracks.indexOf(track), animationState.currentFrame, v);
     }
   }
 
@@ -577,7 +565,9 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
     <!-- Panels row -->
     <div bind:this={panelsEl} class="flex-1 flex min-h-0">
       {#if explorerOpen && explorerState}
-        <div class="flex-1 flex items-center justify-center h-full border-r border-neutral-800 relative">
+        <div
+          class="flex-1 flex items-center justify-center h-full border-r border-neutral-800 relative"
+        >
           <div style="width: {panelW}px; height: {panelH}px;">
             <AnimatorExplorer
               initialState={explorerState}
@@ -632,30 +622,87 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
         }}
         onCyclePeriodChange={handleCyclePeriodChange}
         onOffsetChange={handleOffsetChange}
-        cyclePeriodValue={cyclePeriodValue}
-        offsetValue={offsetValue}
-        hasCyclePeriodKeyframe={hasCyclePeriodKeyframe}
-        hasOffsetKeyframe={hasOffsetKeyframe}
+        {cyclePeriodValue}
+        {offsetValue}
+        {hasCyclePeriodKeyframe}
+        {hasOffsetKeyframe}
       />
     </div>
 
     <!-- Bottom-left: DebugPanel -->
     <div class="absolute bottom-3 left-3 z-[1000]">
       <DebugPanel
-        pools={explorerOpen ? [
-          { name: 'PR', pool: AnimatorPreviewPool.instance, textColor: 'text-blue-400', barColor: 'bg-blue-400' },
-          { name: 'CA', pool: AnimatorCachePool.instance, textColor: 'text-green-500', barColor: 'bg-green-500' },
-          { name: 'RC', pool: AnimatorRecolorPool.instance, textColor: 'text-purple-400', barColor: 'bg-purple-400' },
-          { name: 'EX', pool: AnimatorExportPool.instance, textColor: 'text-yellow-400', barColor: 'bg-yellow-400' },
-          { name: 'S2', pool: ViewerS2Pool.instance, textColor: 'text-pink-400', barColor: 'bg-pink-400' },
-          { name: 'S3', pool: ViewerS3Pool.instance, textColor: 'text-cyan-400', barColor: 'bg-cyan-400' },
-          { name: 'VR', pool: ViewerRecolorPool.instance, textColor: 'text-orange-400', barColor: 'bg-orange-400' }
-        ] : [
-          { name: 'PR', pool: AnimatorPreviewPool.instance, textColor: 'text-blue-400', barColor: 'bg-blue-400' },
-          { name: 'CA', pool: AnimatorCachePool.instance, textColor: 'text-green-500', barColor: 'bg-green-500' },
-          { name: 'RC', pool: AnimatorRecolorPool.instance, textColor: 'text-purple-400', barColor: 'bg-purple-400' },
-          { name: 'EX', pool: AnimatorExportPool.instance, textColor: 'text-yellow-400', barColor: 'bg-yellow-400' }
-        ]}
+        pools={explorerOpen
+          ? [
+              {
+                name: 'PR',
+                pool: AnimatorPreviewPool.instance,
+                textColor: 'text-blue-400',
+                barColor: 'bg-blue-400'
+              },
+              {
+                name: 'CA',
+                pool: AnimatorCachePool.instance,
+                textColor: 'text-green-500',
+                barColor: 'bg-green-500'
+              },
+              {
+                name: 'RC',
+                pool: AnimatorRecolorPool.instance,
+                textColor: 'text-purple-400',
+                barColor: 'bg-purple-400'
+              },
+              {
+                name: 'EX',
+                pool: AnimatorExportPool.instance,
+                textColor: 'text-yellow-400',
+                barColor: 'bg-yellow-400'
+              },
+              {
+                name: 'S2',
+                pool: ViewerS2Pool.instance,
+                textColor: 'text-pink-400',
+                barColor: 'bg-pink-400'
+              },
+              {
+                name: 'S3',
+                pool: ViewerS3Pool.instance,
+                textColor: 'text-cyan-400',
+                barColor: 'bg-cyan-400'
+              },
+              {
+                name: 'VR',
+                pool: ViewerRecolorPool.instance,
+                textColor: 'text-orange-400',
+                barColor: 'bg-orange-400'
+              }
+            ]
+          : [
+              {
+                name: 'PR',
+                pool: AnimatorPreviewPool.instance,
+                textColor: 'text-blue-400',
+                barColor: 'bg-blue-400'
+              },
+              {
+                name: 'CA',
+                pool: AnimatorCachePool.instance,
+                textColor: 'text-green-500',
+                barColor: 'bg-green-500'
+              },
+              {
+                name: 'RC',
+                pool: AnimatorRecolorPool.instance,
+                textColor: 'text-purple-400',
+                barColor: 'bg-purple-400'
+              },
+              {
+                name: 'EX',
+                pool: AnimatorExportPool.instance,
+                textColor: 'text-yellow-400',
+                barColor: 'bg-yellow-400'
+              }
+            ]}
       />
     </div>
 
@@ -663,7 +710,7 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
     <div class="absolute bottom-3 right-3 z-[1000]">
       <ProjectPanel
         open={false}
-        project={project}
+        {project}
         projectName={activeProjectName}
         isDirty={animationState.isDirty}
         onSave={() => {
@@ -689,7 +736,6 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
         onPowerChange={setPower}
       />
     </div>
-
   </div>
 
   <!-- Explorer info + sync bar (below preview, above control bar) -->
@@ -730,7 +776,9 @@ import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
 
   <!-- Control Bar (play, scrub, undo/redo, shortcuts) -->
   <ControlBar
-    onPlay={() => { if (cacheReady) showPlayback = true; }}
+    onPlay={() => {
+      if (cacheReady) showPlayback = true;
+    }}
     onUndo={() => animationState.undo()}
     onRedo={() => animationState.redo()}
     onStepBack={stepBack}

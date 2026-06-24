@@ -32,6 +32,11 @@
 
   let zoomInputRef = $state<HTMLInputElement | null>(null);
 
+  function focus() {
+    zoomInputRef?.focus();
+  }
+  export { focus };
+
   // Local editable copies — only sync from store when not focused
   let reInput = $state(ctrlState.cx);
   let imInput = $state(ctrlState.cy);
@@ -101,7 +106,6 @@
     title="Position"
     position="top-left"
     bind:open
-    focusRef={zoomInputRef}
     oncollapse={() => (showLocations = false)}
   >
     <div class="flex flex-col gap-3 p-3">

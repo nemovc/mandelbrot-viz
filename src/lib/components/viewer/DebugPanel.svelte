@@ -29,6 +29,11 @@
 
   let firstToggleRef = $state<HTMLButtonElement | null>(null);
 
+  function focus() {
+    firstToggleRef?.focus();
+  }
+  export { focus };
+
   // Animator pools only appear once they've been instantiated (e.g. after visiting the animator)
   let memUsed = $state<number | null>(null);
   let memTotal = $state<number | null>(null);
@@ -49,7 +54,7 @@
   }
 </script>
 
-<CollapsiblePanel {title} {position} bind:open focusRef={firstToggleRef}>
+<CollapsiblePanel {title} {position} bind:open>
   <div class="flex flex-col gap-4 px-3 pb-3">
     <!-- Toggles -->
     <div class="flex flex-col gap-1.5 pt-3">

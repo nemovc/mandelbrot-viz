@@ -8,27 +8,19 @@
     position = 'bottom-left',
     oncollapse,
     open = $bindable(true),
-    focusRef,
     children
   }: {
     title: string;
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
     oncollapse?: () => void;
     open?: boolean;
-    focusRef?: HTMLElement | null;
     children?: Snippet;
   } = $props();
 
-  let wasOpen = $state(open);
-
   $effect(() => {
-    if (open && !wasOpen && focusRef) {
-      focusRef.focus();
-    }
-    if (!open && wasOpen) {
+    if (!open) {
       oncollapse?.();
     }
-    wasOpen = open;
   });
 
   function toggle() {

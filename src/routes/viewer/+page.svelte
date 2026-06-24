@@ -17,17 +17,24 @@
   import { ViewerS3Pool } from '$lib/rendering/worker/pools/viewerS3Pool';
   import { ViewerRecolorPool } from '$lib/rendering/worker/pools/viewerRecolorPool';
   import { ViewerExportPool } from '$lib/rendering/worker/pools/viewerExportPool';
-  import { keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
+  import { handleInInput, keyboardLayer } from '$lib/stores/keyboardShortcuts.svelte';
   let showExport = $state(false);
   let mapComponent = $state<MandelbrotMap>();
 
   let inspectorActive = $state(false);
 
   // Panel open state (controlled by keyboard shortcuts)
-  let positionOpen = $state(true);
+  let controlPanelOpen = $state(true);
   let colorOpen = $state(true);
   let debugOpen = $state(false);
   let actionsOpen = $state(true);
+
+  // Refs
+  let controlPanelRef = $state<typeof ControlPanel | null>(null);
+  let colorPanelRef = $state<typeof ColorSchemeEditor | null>(null);
+  let debugPanelRef = $state<typeof DebugPanel | null>(null);
+  let actionsPanelRef = $state<typeof ActionsPanel | null>(null);
+
   let inspectorLocked = $state(false);
   let inspectorRe = $state(0);
   let inspectorIm = $state(0);
@@ -162,48 +169,64 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    const inInput =
-      e.target instanceof HTMLInputElement ||
-      e.target instanceof HTMLButtonElement ||
-      e.target instanceof HTMLTextAreaElement ||
-      e.target instanceof HTMLSelectElement;
-
-    // Escape blurs focused inputs
-    if (e.key === 'Escape' && inInput) {
-      (e.target as HTMLElement).blur();
+    if (handleInInput(e)) {
       return;
     }
 
     // Inspector toggle (i/I)
     if (e.key === 'i' || e.key === 'I') {
-      if (inInput) return;
       toggleInspector();
       return;
     }
 
-    // Panel toggles with Shift (P, C, D, A only - uppercase)
-    if (e.shiftKey && !inInput) {
-      if (e.key === 'P') {
-        e.preventDefault();
-        positionOpen = !positionOpen;
-        return;
+    // Panel control: non-shift toggles, shift opens and focuses
+    // Control panel (position)
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        controlPanelOpen = true;
+        setTimeout(() => controlPanelRef?.focus());
+      } else {
+        controlPanelOpen = !controlPanelOpen;
       }
-      if (e.key === 'C') {
-        e.preventDefault();
-        colorOpen = !colorOpen;
-        return;
-      }
-      if (e.key === 'D') {
-        e.preventDefault();
-        debugOpen = !debugOpen;
-        return;
-      }
-      if (e.key === 'A') {
-        e.preventDefault();
-        actionsOpen = !actionsOpen;
-        return;
-      }
+      return;
     }
+    // ColorSchemeEditor
+    if (e.key === 'c' || e.key === 'C') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        colorOpen = true;
+        setTimeout(() => colorPanelRef?.focus());
+      } else {
+        colorOpen = !colorOpen;
+      }
+      return;
+    }
+
+    // DebugPanel
+    if (e.key === 'd' || e.key === 'D') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        debugOpen = true;
+        setTimeout(() => debugPanelRef?.focus());
+      } else {
+        debugOpen = !debugOpen;
+      }
+      return;
+    }
+
+    // ActionPanel
+    if (e.key === 'a' || e.key === 'A') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        actionsOpen = true;
+        setTimeout(() => actionsPanelRef?.focus());
+      } else {
+        actionsOpen = !actionsOpen;
+      }
+      return;
+    }
+
   }
 </script>
 
@@ -250,7 +273,8 @@
   <div class="absolute top-3 left-3 z-[1000] flex flex-col gap-2">
     <ControlPanel
       onNavigate={(re, im, zoom) => mapComponent?.panTo(re, im, zoom)}
-      bind:open={positionOpen}
+      bind:this={controlPanelRef}
+      bind:open={controlPanelOpen}
     />
   </div>
 
@@ -261,6 +285,7 @@
       setColors={(c) => {
         viewerState.colors = c;
       }}
+      bind:this={colorPanelRef}
     />
   </div>
 
@@ -286,6 +311,7 @@
       onToggleInspector={toggleInspector}
       {inspectorActive}
       bind:open={actionsOpen}
+      bind:this={actionsPanelRef}
     />
   </div>
 
@@ -319,6 +345,7 @@
         }
       ]}
       bind:open={debugOpen}
+      bind:this={debugPanelRef}
     />
   </div>
 

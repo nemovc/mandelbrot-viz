@@ -299,6 +299,9 @@
     }
   }
 
+  // ---- Timeline state ----
+  let selectedTrack = $state<number | null>(null);
+
   // ---- Settings helpers ----
   const project = $derived(animationState.project);
   const isHistogram = $derived(baseAlgorithm(project.algorithm) === 'histogram');
@@ -460,9 +463,6 @@
     });
   });
 
-  // ---- Timeline state ----
-  let selectedTrack = $state<number | null>(null);
-
   // ---- Explorer helpers ----
   function toggleExplorer() {
     if (!explorerOpen) {
@@ -572,7 +572,7 @@
             <AnimatorExplorer
               initialState={explorerState}
               onUpdate={(s) => {
-                explorerState = { ...explorerState, ...s };
+                explorerState = { ...explorerState!, ...s };
               }}
               projectWidth={project.width}
               panelWidth={panelW}
@@ -758,7 +758,7 @@
           onclick={() => {
             const frameState = interpolateAll(animationState.project, animationState.currentFrame);
             explorerState = {
-              ...explorerState,
+              ...explorerState!,
               cx: frameState.cx,
               cy: frameState.cy,
               zoom: frameState.zoom

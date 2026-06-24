@@ -11,7 +11,7 @@
     syncSignal = 0
   }: {
     initialState: ViewerState;
-    onUpdate: (state: ViewerState) => void;
+    onUpdate: (state: { cx: string; cy: string; zoom: number }) => void;
     projectWidth: number;
     panelWidth: number;
     syncSignal?: number;

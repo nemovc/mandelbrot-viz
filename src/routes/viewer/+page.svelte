@@ -30,10 +30,10 @@
   let actionsOpen = $state(true);
 
   // Refs
-  let controlPanelRef = $state<typeof ControlPanel | null>(null);
-  let colorPanelRef = $state<typeof ColorSchemeEditor | null>(null);
-  let debugPanelRef = $state<typeof DebugPanel | null>(null);
-  let actionsPanelRef = $state<typeof ActionsPanel | null>(null);
+  let controlPanelRef = $state<{ focus: () => void } | null>(null);
+  let colorPanelRef = $state<{ focus: () => void } | null>(null);
+  let debugPanelRef = $state<{ focus: () => void } | null>(null);
+  let actionsPanelRef = $state<{ focus: () => void } | null>(null);
 
   let inspectorLocked = $state(false);
   let inspectorRe = $state(0);
@@ -226,7 +226,6 @@
       }
       return;
     }
-
   }
 </script>
 
